@@ -35,7 +35,38 @@ services:
     volumes:
       - request-db-data:/var/lib/postgresql/data
 
+  keycloak-db:
+    image: postgres:16
+    container_name: keycloak-db
+    ports:
+      - "5437:5432"
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak_user
+      POSTGRES_PASSWORD: keycloak_pass
+    volumes:
+      - keycloak-db-data:/var/lib/postgresql/data
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0.4
+    container_name: keycloak
+    command: start-dev
+    ports:
+      - "8280:8080"
+    depends_on:
+      - keycloak-db
+    environment:
+      KC_DB: postgres
+      KC_DB_URL_HOST: keycloak-db
+      KC_DB_URL_PORT: 5432
+      KC_DB_URL_DATABASE: keycloak
+      KC_DB_USERNAME: keycloak_user
+      KC_DB_PASSWORD: keycloak_pass
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+
 volumes:
   client-db-data:
   employee-db-data:
   request-db-data:
+  keycloak-db-data:
